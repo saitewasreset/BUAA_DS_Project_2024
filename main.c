@@ -1,7 +1,6 @@
 #include "CodeSimilarity.h"
 #include "HashTableFast.h"
 #include "IdentifierHash.h"
-#include "KeyInfoStream.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,6 +42,20 @@ int main(void) {
                                                  result.programList[i]);
                 char *keyStreamB = HashTable_get(result.processedProgramTable,
                                                  result.programList[j]);
+                size_t keyStreamALen = result.programKeyStreamLen[i];
+                size_t keyStreamBLen = result.programKeyStreamLen[j];
+
+                double most = 1;
+                if (keyStreamALen > keyStreamBLen) {
+                    most = (double)(keyStreamBLen) / keyStreamALen;
+                } else {
+                    most = (double)(keyStreamALen) / keyStreamBLen;
+                }
+
+                if (most <= SIMILARITY_THRESHOLD) {
+                    continue;
+                }
+
                 double similarity = getSimilarity(
                     keyStreamA, keyStreamB, result.programKeyStreamLen[i],
                     result.programKeyStreamLen[j]);
