@@ -11,7 +11,7 @@ static size_t max(size_t a, size_t b);
 struct ProgramList generateProgramList(char *src,
                                        uint64_t *identifierHashList) {
 
-    struct ProgramList result = {NULL, NULL, NULL, 0};
+    struct ProgramList result = {NULL, NULL, NULL, NULL, NULL, 0};
 
     result.processedProgramTable =
         HashTable_createTable(PROGRAM_HASH_TABLE_MOD);
@@ -21,6 +21,8 @@ struct ProgramList generateProgramList(char *src,
         (size_t *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(size_t));
     result.programFunctionCount =
         (size_t *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(size_t));
+    result.programMainRate =
+        (double *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(double));
     while (1) {
         // skip space
         while (*src == ' ' || *src == '\n' || *src == '\r' || *src == '\t' ||
@@ -62,6 +64,11 @@ struct ProgramList generateProgramList(char *src,
             programKeyInfo.streamLen;
         result.programFunctionCount[result.programCount] =
             programKeyInfo.userFunctionCount;
+
+        char *mainBody = HashTable_get(programKeyInfo.functionTable, "main");
+        result.programMainRate[result.programCount] =
+            1.0 * strlen(mainBody) / programKeyInfo.streamLen;
+
         result.programCount++;
         // program
         while (*src != '\f' && *src != '\0') {
@@ -95,6 +102,7 @@ void destroyProgramList(struct ProgramList *target) {
     free(target->programFunctionCount);
     free(target->programKeyStreamLen);
     free(target->programList);
+    free(target->programMainRate);
 }
 
 size_t max(size_t a, size_t b) {
