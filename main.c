@@ -52,7 +52,7 @@ int main(void) {
                     most = (double)(keyStreamALen) / keyStreamBLen;
                 }
 
-                if (most <= SIMILARITY_THRESHOLD) {
+                if (most * 0.989 <= SIMILARITY_THRESHOLD) {
                     continue;
                 }
 
