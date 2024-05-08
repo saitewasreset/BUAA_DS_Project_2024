@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static size_t max(size_t a, size_t b);
+
 struct ProgramList generateProgramList(char *src,
                                        uint64_t *identifierHashList) {
 
@@ -80,12 +82,21 @@ struct ProgramList generateProgramList(char *src,
 }
 
 inline double getSimilarity(char *keyStreamA, char *keyStreamB,
-                            size_t maxStreamLen) {
-    return 1 - (double)(editdistDP(keyStreamA, keyStreamB)) / maxStreamLen;
+                            size_t streamALen, size_t streamBLen) {
+    return 1 - (double)(editdistDP(keyStreamA, keyStreamB)) /
+                   max(streamALen, streamBLen);
 }
 
 void destroyProgramList(struct ProgramList *target) {
     HashTable_destroyTable(target->processedProgramTable);
     free(target->programKeyStreamLen);
     free(target->programList);
+}
+
+size_t max(size_t a, size_t b) {
+    if (a > b) {
+        return a;
+    } else {
+        return b;
+    }
 }

@@ -28,17 +28,22 @@ int editdistDP(char *str1, char *str2) {
     len1 = strlen(str1) + 1;
     len2 = strlen(str2) + 1;
     (max2(len1, len2) >= MaxDP) ? error2("DP memory error!") : len1;
+    for (j = 0; j <= len2; j++) {
+        Dp[0][j] = j;
+    }
+
     for (i = 0; i <= len1; i++) {
-        for (j = 0; j <= len2; j++) {
-            if (i == 0)
-                Dp[i][j] = j;
-            else if (j == 0)
-                Dp[i][j] = i;
-            else if (str1[i - 1] == str2[j - 1])
+        Dp[i][0] = i;
+    }
+    for (i = 1; i <= len1; i++) {
+        for (j = 1; j <= len2; j++) {
+            if (str1[i - 1] == str2[j - 1]) {
                 Dp[i][j] = Dp[i - 1][j - 1];
-            else
-                Dp[i][j] =
+            } else {
+                int result =
                     1 + min3(Dp[i][j - 1], Dp[i - 1][j], Dp[i - 1][j - 1]);
+                Dp[i][j] = result;
+            }
         }
     }
     return Dp[len1][len2];

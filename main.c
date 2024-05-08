@@ -43,10 +43,9 @@ int main(void) {
                                                  result.programList[i]);
                 char *keyStreamB = HashTable_get(result.processedProgramTable,
                                                  result.programList[j]);
-                double similarity =
-                    getSimilarity(keyStreamA, keyStreamB,
-                                  max(result.programKeyStreamLen[i],
-                                      result.programKeyStreamLen[j]));
+                double similarity = getSimilarity(
+                    keyStreamA, keyStreamB, result.programKeyStreamLen[i],
+                    result.programKeyStreamLen[j]);
 
                 if (similarity > SIMILARITY_THRESHOLD) {
                     if (!firstPrinted) {
