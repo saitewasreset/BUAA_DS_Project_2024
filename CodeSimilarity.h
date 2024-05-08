@@ -13,6 +13,7 @@ struct ProgramList {
     struct HashTable *processedProgramTable;
     char **programList;
     size_t *programKeyStreamLen;
+    size_t *programFunctionCount;
     size_t programCount;
 };
 

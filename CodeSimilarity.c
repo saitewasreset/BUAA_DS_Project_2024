@@ -19,7 +19,8 @@ struct ProgramList generateProgramList(char *src,
         (char **)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(char *));
     result.programKeyStreamLen =
         (size_t *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(size_t));
-
+    result.programFunctionCount =
+        (size_t *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(size_t));
     while (1) {
         // skip space
         while (*src == ' ' || *src == '\n' || *src == '\r' || *src == '\t' ||
@@ -59,6 +60,8 @@ struct ProgramList generateProgramList(char *src,
         result.programList[result.programCount] = currentProgramId;
         result.programKeyStreamLen[result.programCount] =
             programKeyInfo.streamLen;
+        result.programFunctionCount[result.programCount] =
+            programKeyInfo.userFunctionCount;
         result.programCount++;
         // program
         while (*src != '\f' && *src != '\0') {
@@ -89,6 +92,7 @@ inline double getSimilarity(char *keyStreamA, char *keyStreamB,
 
 void destroyProgramList(struct ProgramList *target) {
     HashTable_destroyTable(target->processedProgramTable);
+    free(target->programFunctionCount);
     free(target->programKeyStreamLen);
     free(target->programList);
 }

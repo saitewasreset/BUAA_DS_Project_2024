@@ -56,6 +56,11 @@ int main(void) {
                     continue;
                 }
 
+                if (result.programFunctionCount[i] !=
+                    result.programFunctionCount[j]) {
+                    continue;
+                }
+
                 double similarity = getSimilarity(
                     keyStreamA, keyStreamB, result.programKeyStreamLen[i],
                     result.programKeyStreamLen[j]);
