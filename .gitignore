@@ -1,0 +1,5 @@
+*.out
+*.zip
+perf.data
+perf.data.*
+*.txt
