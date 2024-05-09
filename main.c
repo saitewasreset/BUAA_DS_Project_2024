@@ -67,6 +67,12 @@ int main(void) {
                     continue;
                 }
 
+                double firstSecondRateRate =
+                    result.firstSecondRate[i] / result.firstSecondRate[j];
+                if (firstSecondRateRate < 0.90 || firstSecondRateRate > 1.1) {
+                    continue;
+                }
+
                 double similarity = getSimilarity(
                     keyStreamA, keyStreamB, result.programKeyStreamLen[i],
                     result.programKeyStreamLen[j]);

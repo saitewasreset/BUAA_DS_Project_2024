@@ -23,6 +23,8 @@ struct ProgramList generateProgramList(char *src,
         (size_t *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(size_t));
     result.programMainRate =
         (double *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(double));
+    result.firstSecondRate =
+        (double *)malloc(MAX_PROGRAM_SEG_COUNT * sizeof(double));
     while (1) {
         // skip space
         while (*src == ' ' || *src == '\n' || *src == '\r' || *src == '\t' ||
@@ -66,8 +68,21 @@ struct ProgramList generateProgramList(char *src,
             programKeyInfo.userFunctionCount;
 
         char *mainBody = HashTable_get(programKeyInfo.functionTable, "main");
+        size_t mainLen = strlen(mainBody);
         result.programMainRate[result.programCount] =
-            1.0 * strlen(mainBody) / programKeyInfo.streamLen;
+            1.0 * mainLen / programKeyInfo.streamLen;
+
+        char *secondFunctionName = programKeyInfo.userFunctionList[0];
+
+        if (secondFunctionName != NULL) {
+            char *secondBody =
+                HashTable_get(programKeyInfo.functionTable,
+                              programKeyInfo.userFunctionList[0]);
+            result.firstSecondRate[result.programCount] =
+                1.0 * mainLen / strlen(secondBody);
+        } else {
+            result.firstSecondRate[result.programCount] = 1000;
+        }
 
         result.programCount++;
         // program
@@ -103,6 +118,7 @@ void destroyProgramList(struct ProgramList *target) {
     free(target->programKeyStreamLen);
     free(target->programList);
     free(target->programMainRate);
+    free(target->firstSecondRate);
 }
 
 size_t max(size_t a, size_t b) {

@@ -15,6 +15,7 @@ struct ProgramList {
     size_t *programKeyStreamLen;
     size_t *programFunctionCount;
     double *programMainRate;
+    double *firstSecondRate;
     size_t programCount;
 };
 
