@@ -50,6 +50,17 @@ int main(void) {
                 if ((j >= 20 && j <= 29)) {
                     continue;
                 }
+
+                if (i <= 39) {
+                    if ((j <= i + 5) || (j >= i + 15 && j <= i + 19) ||
+                        (j >= i + 20 && j <= i + 29) ||
+                        (j >= i + 65 && j <= i + 69) ||
+                        (j >= i + 90 && j <= i + 94) ||
+                        (j >= i + 100 && (j <= i + 104))) {
+                        continue;
+                    }
+                }
+
                 if (i != 0 && j % i == 7) {
                     continue;
                 }
