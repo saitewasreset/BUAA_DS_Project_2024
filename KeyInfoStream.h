@@ -11,13 +11,15 @@
 #define MAX_IDENTIFIER_LEN 255
 #define USER_FUNCTION_IDENTIFIER "FUNC"
 #define FUNCTION_HASH_TABLE_MOD 101
-#define MAX_USER_FUNCTION_COUNT 65535
+#define MAX_USER_FUNCTION_COUNT 16
 
 struct ProgramKeyInfo {
     struct HashTable *functionTable;
     char **userFunctionList;
     size_t userFunctionCount; // called in main, order by calling, functions in
                               // the list MAY NOT defined in the program
+    size_t mainKeepWordsCount;
+    size_t totalKeepWordsCount;
     size_t streamLen;
 };
 
@@ -25,7 +27,8 @@ size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                                      uint64_t *identifierHashList,
                                      char **userFunctionList,
                                      bool saveUserFunction,
-                                     char **userDefinedFunctionList);
+                                     char **userDefinedFunctionList,
+                                     size_t *keepWordsCount);
 // source could end with '\f' or '\0'
 struct ProgramKeyInfo generateProgramKeyInfo(char *source,
                                              uint64_t *identifierHashList);

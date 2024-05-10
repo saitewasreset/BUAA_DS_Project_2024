@@ -11,7 +11,8 @@ size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                                      uint64_t *identifierHashList,
                                      char **userFunctionList,
                                      bool saveUserFunction,
-                                     char **userDefinedFunctionList) {
+                                     char **userDefinedFunctionList,
+                                     size_t *keepWordsCount) {
     size_t sourceLen = strlen(source);
     char *_source = (char *)malloc((sourceLen + 1) * sizeof(char));
     strcpy(_source, source);
@@ -21,6 +22,7 @@ size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
     size_t currentIdentifierEnd = 0;
 
     size_t userFunctionListLen = 0;
+    *keepWordsCount = 0;
 
     // identifier: [begin, end)
     // 0x00 for to delete identifier; 0xFF for user function name
@@ -110,6 +112,8 @@ size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                             free(userFunctionName);
                         }
                     }
+                } else {
+                    (*keepWordsCount)++;
                 }
             }
         }
@@ -147,7 +151,7 @@ size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
 
 struct ProgramKeyInfo generateProgramKeyInfo(char *source,
                                              uint64_t *identifierHashList) {
-    struct ProgramKeyInfo result = {NULL, NULL, 0, 0};
+    struct ProgramKeyInfo result = {NULL, NULL, 0, 0, 0, 0};
 
     result.userFunctionList =
         (char **)malloc(MAX_USER_FUNCTION_COUNT * sizeof(char *));
@@ -270,20 +274,28 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
 
         memcpy(functionBody, bodyBegin, (size_t)(current - bodyBegin));
 
+        size_t keepWordsCount = 0;
+
         char *functionKeyInfoStream =
             (char *)malloc((bodyLen + 1) * sizeof(char));
         if (!mainFunctionEncountered && strcmp(functionName, "main") == 0) {
             mainFunctionEncountered = true;
             result.streamLen += generateFunctionKeyInfoStream(
                 functionBody, functionKeyInfoStream, identifierHashList,
-                result.userFunctionList, true, userDefinedFunctionList);
+                result.userFunctionList, true, userDefinedFunctionList,
+                &keepWordsCount);
             while (result.userFunctionList[result.userFunctionCount] != 0) {
                 result.userFunctionCount++;
             }
+            result.totalKeepWordsCount += keepWordsCount;
+
         } else {
             result.streamLen += generateFunctionKeyInfoStream(
                 functionBody, functionKeyInfoStream, identifierHashList,
-                result.userFunctionList, false, userDefinedFunctionList);
+                result.userFunctionList, false, userDefinedFunctionList,
+                &keepWordsCount);
+            result.mainKeepWordsCount = keepWordsCount;
+            result.totalKeepWordsCount += keepWordsCount;
         }
 
         free(functionBody);

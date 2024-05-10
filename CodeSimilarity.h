@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #define MAX_PROGRAM_ID_LEN 18
-#define MAX_PROGRAM_SEG_COUNT 65535
+#define MAX_PROGRAM_SEG_COUNT 128
 #define PROGRAM_HASH_TABLE_MOD 101
 #define SIMILARITY_THRESHOLD 0.95
 
@@ -16,6 +16,8 @@ struct ProgramList {
     size_t *programFunctionCount;
     double *programMainRate;
     double *firstSecondRate;
+    size_t *programMainKeepWordsCount;
+    size_t *totalKeepWordsCount;
     size_t programCount;
 };
 

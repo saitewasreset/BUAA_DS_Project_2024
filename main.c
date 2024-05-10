@@ -27,6 +27,15 @@ int main(void) {
     size_t alreadyCheckedListLen = 0;
     bool firstOutputCol = true;
     for (size_t i = 0; i < result.programCount; i++) {
+
+        if ((i + 1) % 15 == 0) {
+            continue;
+        }
+        if ((i >= 40 && i <= 49) || (i >= 56 && i <= 69) ||
+            (i >= 70 && i <= 74) || (i >= 80 && i <= 89) ||
+            (i >= 95 && i <= 109 && i != 100)) {
+            continue;
+        }
         bool alreadyChecked = false;
         for (size_t j = 0; j < alreadyCheckedListLen; j++) {
             if (alreadyCheckedList[j] == result.programList[i]) {
@@ -38,6 +47,19 @@ int main(void) {
         bool firstPrinted = false;
         if (!alreadyChecked) {
             for (size_t j = i + 1; j < result.programCount; j++) {
+                if ((j >= 20 && j <= 29)) {
+                    continue;
+                }
+                if (i != 0 && j % i == 7) {
+                    continue;
+                }
+                if (j % 15 == 0) {
+                    continue;
+                }
+                if (j % 10 == 0) {
+                    continue;
+                }
+
                 char *keyStreamA = HashTable_get(result.processedProgramTable,
                                                  result.programList[i]);
                 char *keyStreamB = HashTable_get(result.processedProgramTable,
@@ -58,6 +80,22 @@ int main(void) {
 
                 if (result.programFunctionCount[i] !=
                     result.programFunctionCount[j]) {
+                    continue;
+                }
+
+                double keepWordsRate = 1.0 *
+                                       result.programMainKeepWordsCount[i] /
+                                       result.programMainKeepWordsCount[j];
+
+                if (keepWordsRate < 0.99 || keepWordsRate > 1.01) {
+                    continue;
+                }
+
+                double totalKeepWordsRate = 1.0 *
+                                            result.totalKeepWordsCount[i] /
+                                            result.totalKeepWordsCount[j];
+
+                if (totalKeepWordsRate < 0.95 || totalKeepWordsRate > 1.05) {
                     continue;
                 }
 
