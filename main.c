@@ -1,17 +1,18 @@
 #include "CodeSimilarity.h"
 #include "HashTableFast.h"
 #include "IdentifierHash.h"
-#include "KeyInfoStream.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_CODES_LEN 1048576
+#define MAX_CODES_LEN 1024 * 1024 * 64
 
 size_t max(size_t a, size_t b);
 
+char *buffer = NULL;
+
 int main(void) {
-    char buffer[MAX_CODES_LEN] = {0};
+    buffer = (char *)malloc(MAX_CODES_LEN * sizeof(char));
     FILE *f = fopen("codes.txt", "r");
     FILE *keepWordsFile = fopen("keepwords.txt", "r");
     fread(buffer, sizeof(char), MAX_CODES_LEN, f);
@@ -73,6 +74,7 @@ int main(void) {
     }
     free(alreadyCheckedList);
     destroyProgramList(&result);
+    free(buffer);
     fclose(keepWordsFile);
     fclose(f);
 

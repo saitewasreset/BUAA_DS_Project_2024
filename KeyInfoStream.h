@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define MAX_FUNCTION_NAME_LEN 85
+#define MAX_FUNCTION_NAME_LEN 255
 #define MAX_IDENTIFIER_LEN 255
 #define USER_FUNCTION_IDENTIFIER "FUNC"
 #define FUNCTION_HASH_TABLE_MOD 100591
