@@ -1,37 +1,40 @@
 // Afraid of the dark? No need, you got me!
+// Avg: 6.43651 std: 1.17552
+// Avg: 6.55407 std: 1.19309
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-#define ROCK_AND_STONE 18
-#define WE_ARE_RICH 107
 #define LET_THERE_BE_LIGHT 1024 * 1024
+#define INVENTORY_CAPACITY 6
+#define CREDIT 327
 
 #define selectMission open
 #define Mining_Expedition O_RDONLY
 #define mission_t int
 #define mine mmap
 #define Mission_Selection_Terminal "codes.txt"
-#define fighting printf
 #define return_to_drop_pod return 0
 #define deep_rock_galactic main
 #define gg int
 #define terrain_scan strchr
-
-#define Mactera_Grabber "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s"
-#define Cave_Leech "\n%s %s %s %s %s"
-#define Glyphid_Septic_Spreader "\n%s %s "
-#define Glyphid_Acid_Spitter "\n%s %s %s %s %s %s"
-#define Glyphid_Exploder "\n%s %s "
-#define Glyphid_Web_Spitter "\n%s %s %s "
-#define Glyphid_Stingtail "\n%s %s "
-#define Glyphid_Bulk_Detonator "\n%s %s "
+#define deposit fwrite
 
 void store(char *molly);
 
-char minerals[WE_ARE_RICH][ROCK_AND_STONE] = {{0}};
+int nitraPos[106] = {0,   -1,  -1,  -1,  -1,  -1,  120, -1,  7,   -1,  -1,  14,
+                     -1,  -1,  -1,  -1,  -1,  156, -1,  -1,  -1,  -1,  171, 214,
+                     -1,  -1,  -1,  -1,  -1,  -1,  -1,  21,  28,  -1,  229, -1,
+                     251, -1,  -1,  266, -1,  -1,  -1,  -1,  -1,  -1,  236, -1,
+                     -1,  -1,  -1,  273, 35,  -1,  42,  281, -1,  178, 288, 49,
+                     -1,  127, 56,  -1,  221, -1,  -1,  -1,  243, 134, -1,  185,
+                     258, 63,  -1,  -1,  141, -1,  70,  296, -1,  -1,  -1,  -1,
+                     77,  84,  91,  -1,  148, -1,  311, -1,  -1,  -1,  192, 98,
+                     -1,  105, 163, -1,  -1,  -1,  199, -1,  206, -1};
+
+char mollyStorage[CREDIT] = {0};
 
 gg deep_rock_galactic(void) {
     mission_t mission =
@@ -43,44 +46,19 @@ gg deep_rock_galactic(void) {
     // Lighting up!
     store(molly);
 
-    // i == 0
+    mollyStorage[119] = '\n';
+    mollyStorage[155] = '\n';
+    mollyStorage[170] = '\n';
+    mollyStorage[213] = '\n';
+    mollyStorage[228] = '\n';
+    mollyStorage[250] = '\n';
+    mollyStorage[265] = '\n';
+    mollyStorage[280] = '\n';
+    mollyStorage[295] = '\n';
+    mollyStorage[310] = '\n';
+    mollyStorage[325] = '\n';
 
-    fighting(Mactera_Grabber, minerals[0], minerals[8], minerals[11],
-             minerals[31], minerals[32], minerals[52], minerals[54],
-             minerals[59], minerals[62], minerals[73], minerals[78],
-             minerals[84], minerals[85], minerals[86], minerals[95],
-             minerals[97], minerals[106]);
-
-    // i = 6
-    fighting(Cave_Leech, minerals[6], minerals[61], minerals[69], minerals[76],
-             minerals[88]);
-
-    // i = 17
-    fighting(Glyphid_Septic_Spreader, minerals[17], minerals[98]);
-    // i = 22
-    fighting(Glyphid_Acid_Spitter, minerals[22], minerals[57], minerals[71],
-             minerals[94], minerals[102], minerals[104]);
-
-    // i = 23
-    fighting(Glyphid_Exploder, minerals[23], minerals[64]);
-
-    // i = 34
-    fighting(Glyphid_Web_Spitter, minerals[34], minerals[46], minerals[68]);
-
-    // i = 36
-    fighting(Glyphid_Stingtail, minerals[36], minerals[72]);
-
-    // i = 39
-    fighting(Glyphid_Stingtail, minerals[39], minerals[51]);
-
-    // i = 55
-    fighting(Glyphid_Stingtail, minerals[55], minerals[58]);
-    // i = 79
-    fighting(Glyphid_Stingtail, minerals[79], minerals[106]);
-
-    // i = 90
-    fighting(Glyphid_Bulk_Detonator, minerals[90], minerals[106]);
-
+    deposit(mollyStorage, sizeof(char), CREDIT, stdout);
     // First!
     return_to_drop_pod;
 }
@@ -95,13 +73,22 @@ inline void store(char *molly) {
                *current == '\t') {
             current++;
         }
-        char *currentBegin = current;
 
-        current = terrain_scan(current, '\r');
-
-        memcpy(minerals[currentObjective], currentBegin,
-               (current - currentBegin));
-        minerals[currentObjective][current - currentBegin] = '\0';
+        if (currentObjective != 106) {
+            if (nitraPos[currentObjective] != -1) {
+                memcpy(mollyStorage + nitraPos[currentObjective], current,
+                       INVENTORY_CAPACITY);
+                mollyStorage[nitraPos[currentObjective] + INVENTORY_CAPACITY] =
+                    ' ';
+            }
+        } else {
+            memcpy(mollyStorage + 112, current, INVENTORY_CAPACITY);
+            mollyStorage[118] = ' ';
+            memcpy(mollyStorage + 303, current, INVENTORY_CAPACITY);
+            mollyStorage[309] = ' ';
+            memcpy(mollyStorage + 318, current, INVENTORY_CAPACITY);
+            mollyStorage[324] = ' ';
+        }
         currentObjective++;
 
         current = terrain_scan(current, '\f');
