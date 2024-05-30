@@ -315,7 +315,8 @@ void destroyProgramKeyInfo(struct ProgramKeyInfo *target) {
 void generateProgramKeyInfoStreamStr(struct ProgramKeyInfo *programKeyInfo,
                                      char *result) {
     // main
-    char *mainInfoStream = HashTable_get(programKeyInfo->functionTable, "main");
+    char *mainInfoStream =
+        HashTable_get(programKeyInfo->functionTable, (char *)"main");
 
     strcpy(result, mainInfoStream);
     for (size_t i = 0; i < programKeyInfo->userFunctionCount; i++) {

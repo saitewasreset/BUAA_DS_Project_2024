@@ -33,7 +33,7 @@ struct ProgramList generateProgramList(char *src,
         char *currentProgramId = (char *)malloc(
             (size_t)(src - currentProgramSectionBegin + 1) * sizeof(char));
         memcpy(currentProgramId, currentProgramSectionBegin,
-               src - currentProgramSectionBegin);
+               (size_t)(src - currentProgramSectionBegin));
         currentProgramId[src - currentProgramSectionBegin] = '\0';
 
         // skip space
@@ -81,7 +81,8 @@ struct ProgramList generateProgramList(char *src,
 
 inline double getSimilarity(char *keyStreamA, char *keyStreamB,
                             size_t maxStreamLen) {
-    return 1 - (double)(editdistDP(keyStreamA, keyStreamB)) / maxStreamLen;
+    return 1 -
+           (double)(editdistDP(keyStreamA, keyStreamB)) / (double)maxStreamLen;
 }
 
 void destroyProgramList(struct ProgramList *target) {

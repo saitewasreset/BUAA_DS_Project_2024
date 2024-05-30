@@ -6,14 +6,13 @@
 #define MaxDP 3300
 
 int (*Dp)[MaxDP];
-int min3(int a, int b, int c) {
+
+int editdistDP(char *str1, char *str2);
+int min3(int a, int b, int c);
+
+inline int min3(int a, int b, int c) {
     int min = a < b ? a : b;
     return min < c ? min : c;
-}
-
-int initDP() {
-    Dp = (int(*)[MaxDP])malloc(MaxDP * MaxDP * sizeof(int));
-    return 0;
 }
 
 int editdistDP(char *str1, char *str2) {
@@ -21,10 +20,13 @@ int editdistDP(char *str1, char *str2) {
     int len1, len2;
     static int flag = 0;
 
-    (flag++) ? 1 : initDP();
+    if (flag == 0) {
+        Dp = (int(*)[MaxDP])malloc(MaxDP * MaxDP * sizeof(int));
+        flag = 1;
+    }
 
-    len1 = strlen(str1) + 1;
-    len2 = strlen(str2) + 1;
+    len1 = (int)strlen(str1) + 1;
+    len2 = (int)strlen(str2) + 1;
 
     for (j = 0; j <= len2; j++) {
         Dp[0][j] = j;
