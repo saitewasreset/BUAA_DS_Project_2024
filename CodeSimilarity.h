@@ -17,8 +17,9 @@ struct ProgramList {
 };
 
 struct ProgramList generateProgramList(char *src, uint64_t *identifierHashList);
-double getSimilarity(char *keyStreamA, char *keyStreamB, size_t maxStreamLen);
+double getSimilarity(char *keyStreamA, char *keyStreamB, size_t keyStreamALen,
+                     size_t keyStreamBLen);
 void destroyProgramList(struct ProgramList *target);
-int editdistDP(char *str1, char *str2);
+int editdistDP(char *str1, char *str2, int str1Len, int str2Len);
 
 #endif

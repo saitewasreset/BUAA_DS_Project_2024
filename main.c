@@ -32,6 +32,7 @@ int main(void) {
         (bool *)calloc(result.programCount, sizeof(bool));
 
     bool firstOutputCol = true;
+
     for (size_t i = 0; i < result.programCount; i++) {
         bool alreadyChecked = alreadyCheckedList[i];
 
@@ -84,10 +85,8 @@ int main(void) {
                     continue;
                 }
 
-                double similarity =
-                    getSimilarity(keyStreamA, keyStreamB,
-                                  max(result.programKeyStreamLen[i],
-                                      result.programKeyStreamLen[j]));
+                double similarity = getSimilarity(keyStreamA, keyStreamB,
+                                                  keyStreamALen, keyStreamBLen);
 
                 if (similarity > SIMILARITY_THRESHOLD) {
                     if (!firstPrinted) {

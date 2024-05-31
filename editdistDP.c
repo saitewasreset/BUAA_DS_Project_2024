@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -7,7 +8,7 @@
 
 int (*Dp)[MaxDP];
 
-int editdistDP(char *str1, char *str2);
+int editdistDP(char *str1, char *str2, int str1Len, int str2Len);
 int min3(int a, int b, int c);
 
 inline int min3(int a, int b, int c) {
@@ -15,7 +16,7 @@ inline int min3(int a, int b, int c) {
     return min < c ? min : c;
 }
 
-int editdistDP(char *str1, char *str2) {
+int editdistDP(char *str1, char *str2, int str1Len, int str2Len) {
     int i, j;
     int len1, len2;
     static int flag = 0;
@@ -25,8 +26,8 @@ int editdistDP(char *str1, char *str2) {
         flag = 1;
     }
 
-    len1 = (int)strlen(str1) + 1;
-    len2 = (int)strlen(str2) + 1;
+    len1 = str1Len + 1;
+    len2 = str2Len + 1;
 
     for (j = 0; j <= len2; j++) {
         Dp[0][j] = j;
