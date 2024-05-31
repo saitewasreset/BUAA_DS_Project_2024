@@ -52,7 +52,7 @@ int main(void) {
                 size_t keyStreamBLen = result.programKeyStreamLen[j];
 
                 size_t maxStreamLen = max(keyStreamALen, keyStreamBLen);
-                /*
+
                 double most = 1;
                 if (keyStreamALen > keyStreamBLen) {
                     most = (double)(keyStreamBLen) / (double)keyStreamALen;
@@ -90,7 +90,7 @@ int main(void) {
                     skipBycD++;
                     continue;
                 }
-                */
+
                 size_t maxDist = maxStreamLen * (1 - SIMILARITY_THRESHOLD) + 1;
                 double similarity =
                     getSimilarity(keyStreamA, keyStreamB, keyStreamALen,
