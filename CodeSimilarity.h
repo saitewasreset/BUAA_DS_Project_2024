@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 #define MAX_PROGRAM_ID_LEN 64
-#define MAX_PROGRAM_SEG_COUNT 65535
-#define PROGRAM_HASH_TABLE_MOD 100591
+#define MAX_PROGRAM_SEG_COUNT 255
+#define PROGRAM_HASH_TABLE_MOD 233
 #define SIMILARITY_THRESHOLD 0.95
 
 struct ProgramList {

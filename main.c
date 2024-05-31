@@ -50,9 +50,9 @@ int main(void) {
 
                 double most = 1;
                 if (keyStreamALen > keyStreamBLen) {
-                    most = (double)(keyStreamBLen) / keyStreamALen;
+                    most = (double)(keyStreamBLen) / (double)keyStreamALen;
                 } else {
-                    most = (double)(keyStreamALen) / keyStreamBLen;
+                    most = (double)(keyStreamALen) / (double)keyStreamBLen;
                 }
 
                 if (most <= SIMILARITY_THRESHOLD) {
@@ -108,6 +108,7 @@ int main(void) {
             }
         }
     }
+
     free(characterCountList);
     free(characterCountGenerated);
     free(alreadyCheckedList);
