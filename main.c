@@ -91,12 +91,21 @@ int main(void) {
                     continue;
                 }
 
+                int hDist = hammingDist(keyStreamA, keyStreamB,
+                                        (int)keyStreamALen, (int)keyStreamBLen);
+
                 size_t maxDist = maxStreamLen * (1 - SIMILARITY_THRESHOLD) + 1;
+
+                if (hDist < (int)maxDist - 1) {
+                    goto SIM;
+                }
+
                 double similarity =
                     getSimilarity(keyStreamA, keyStreamB, keyStreamALen,
                                   keyStreamBLen, maxDist);
 
                 if (similarity > SIMILARITY_THRESHOLD) {
+                SIM:
                     if (!firstPrinted) {
                         if (!firstOutputCol) {
                             putchar('\n');

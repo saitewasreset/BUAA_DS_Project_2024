@@ -89,6 +89,25 @@ inline double getSimilarity(char *keyStreamA, char *keyStreamB,
                    (double)maxStreamLen;
 }
 
+int hammingDist(char *str1, char *str2, int str1Len, int str2Len) {
+    int delta = str1Len - str2Len;
+    int minLen = str1Len;
+    if (delta < 0) {
+        delta = -delta;
+    } else {
+        minLen = str2Len;
+    }
+    int result = 0;
+    for (int i = 0; i < minLen; i++) {
+        if (str1[i] != str2[i]) {
+            result++;
+        }
+    }
+
+    result += delta;
+    return result;
+}
+
 void destroyProgramList(struct ProgramList *target) {
     HashTable_destroyTable(target->processedProgramTable);
     free(target->programKeyStreamLen);
