@@ -24,18 +24,12 @@ int main(void) {
 
     // HashTable_printTable(result.processedProgramTable);
 
-    char **alreadyCheckedList =
-        (char **)malloc(result.programCount * sizeof(char *));
-    size_t alreadyCheckedListLen = 0;
+    bool *alreadyCheckedList =
+        (bool *)calloc(result.programCount, sizeof(bool));
+
     bool firstOutputCol = true;
     for (size_t i = 0; i < result.programCount; i++) {
-        bool alreadyChecked = false;
-        for (size_t j = 0; j < alreadyCheckedListLen; j++) {
-            if (alreadyCheckedList[j] == result.programList[i]) {
-                alreadyChecked = true;
-                break;
-            }
-        }
+        bool alreadyChecked = alreadyCheckedList[i];
 
         bool firstPrinted = false;
         if (!alreadyChecked) {
@@ -62,12 +56,8 @@ int main(void) {
                     } else {
                         printf("%s ", result.programList[j]);
                     }
-                    alreadyCheckedList[alreadyCheckedListLen] =
-                        result.programList[i];
-                    alreadyCheckedListLen++;
-                    alreadyCheckedList[alreadyCheckedListLen] =
-                        result.programList[j];
-                    alreadyCheckedListLen++;
+                    alreadyCheckedList[i] = true;
+                    alreadyCheckedList[j] = true;
                 }
             }
         }
