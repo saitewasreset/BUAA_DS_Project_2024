@@ -32,13 +32,17 @@ int main(void) {
         (bool *)calloc(result.programCount, sizeof(bool));
 
     bool firstOutputCol = true;
-
+    size_t totalCmp = 0;
+    size_t skipByLen = 0;
+    size_t skipBycD = 0;
+    size_t skipByF = 0;
     for (size_t i = 0; i < result.programCount; i++) {
         bool alreadyChecked = alreadyCheckedList[i];
 
         bool firstPrinted = false;
         if (!alreadyChecked) {
             for (size_t j = i + 1; j < result.programCount; j++) {
+                totalCmp++;
                 char *keyStreamA = HashTable_get(result.processedProgramTable,
                                                  result.programList[i]);
                 char *keyStreamB = HashTable_get(result.processedProgramTable,
@@ -48,7 +52,7 @@ int main(void) {
                 size_t keyStreamBLen = result.programKeyStreamLen[j];
 
                 size_t maxStreamLen = max(keyStreamALen, keyStreamBLen);
-
+                /*
                 double most = 1;
                 if (keyStreamALen > keyStreamBLen) {
                     most = (double)(keyStreamBLen) / (double)keyStreamALen;
@@ -57,6 +61,7 @@ int main(void) {
                 }
 
                 if (most <= SIMILARITY_THRESHOLD) {
+                    skipByLen++;
                     continue;
                 }
 
@@ -82,11 +87,14 @@ int main(void) {
                 }
 
                 if (cDistance >= (maxStreamLen / 10 - 1)) {
+                    skipBycD++;
                     continue;
                 }
-
-                double similarity = getSimilarity(keyStreamA, keyStreamB,
-                                                  keyStreamALen, keyStreamBLen);
+                */
+                size_t maxDist = maxStreamLen * (1 - SIMILARITY_THRESHOLD) + 1;
+                double similarity =
+                    getSimilarity(keyStreamA, keyStreamB, keyStreamALen,
+                                  keyStreamBLen, maxDist);
 
                 if (similarity > SIMILARITY_THRESHOLD) {
                     if (!firstPrinted) {
@@ -107,7 +115,7 @@ int main(void) {
             }
         }
     }
-
+    // printf("\n%zu %zu %zu %zu\n", totalCmp, skipByLen, skipBycD, skipByF);
     free(characterCountList);
     free(characterCountGenerated);
     free(alreadyCheckedList);

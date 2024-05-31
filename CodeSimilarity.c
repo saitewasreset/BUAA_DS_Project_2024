@@ -80,11 +80,12 @@ struct ProgramList generateProgramList(char *src,
 }
 
 inline double getSimilarity(char *keyStreamA, char *keyStreamB,
-                            size_t keyStreamALen, size_t keyStreamBLen) {
+                            size_t keyStreamALen, size_t keyStreamBLen,
+                            size_t maxDist) {
     size_t maxStreamLen =
         keyStreamALen > keyStreamBLen ? keyStreamALen : keyStreamBLen;
     return 1 - (double)(editdistDP(keyStreamA, keyStreamB, (int)keyStreamALen,
-                                   (int)keyStreamBLen)) /
+                                   (int)keyStreamBLen, (int)maxDist)) /
                    (double)maxStreamLen;
 }
 
