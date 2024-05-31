@@ -48,15 +48,15 @@ struct ProgramList generateProgramList(char *src,
         struct ProgramKeyInfo programKeyInfo =
             generateProgramKeyInfo(currentProgramBegin, identifierHashList);
 
-        char *programKeyInfoStream =
-            (char *)malloc((programKeyInfo.streamLen + 1) * sizeof(char));
-        generateProgramKeyInfoStreamStr(&programKeyInfo, programKeyInfoStream);
+        char *programKeyInfoStream = NULL;
+        size_t programKeyInfoStreamLen = generateProgramKeyInfoStreamStr(
+            &programKeyInfo, &programKeyInfoStream);
 
         HashTable_insert(result.processedProgramTable, currentProgramId,
                          programKeyInfoStream);
         result.programList[result.programCount] = currentProgramId;
         result.programKeyStreamLen[result.programCount] =
-            programKeyInfo.streamLen;
+            programKeyInfoStreamLen;
         result.programCount++;
         // program
         while (*src != '\f' && *src != '\0') {

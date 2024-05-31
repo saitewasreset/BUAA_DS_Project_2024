@@ -7,11 +7,11 @@
 
 bool inIdentifierCharset(char c, bool begin);
 
-size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
-                                     uint64_t *identifierHashList,
-                                     char **userFunctionList,
-                                     bool saveUserFunction,
-                                     char **userDefinedFunctionList) {
+void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
+                                   uint64_t *identifierHashList,
+                                   char **userFunctionList,
+                                   bool saveUserFunction,
+                                   char **userDefinedFunctionList) {
     size_t sourceLen = strlen(source);
     char *_source = (char *)malloc((sourceLen + 1) * sizeof(char));
     strcpy(_source, source);
@@ -142,12 +142,11 @@ size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
 
     keyInfoStream[keyInfoStreamIndex] = '\0';
     free(_source);
-    return keyInfoStreamIndex;
 }
 
 struct ProgramKeyInfo generateProgramKeyInfo(char *source,
                                              uint64_t *identifierHashList) {
-    struct ProgramKeyInfo result = {NULL, NULL, 0, 0};
+    struct ProgramKeyInfo result = {NULL, NULL, 0};
 
     result.userFunctionList =
         (char **)malloc(MAX_USER_FUNCTION_COUNT * sizeof(char *));
@@ -274,14 +273,14 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
             (char *)malloc((bodyLen + 1) * sizeof(char));
         if (!mainFunctionEncountered && strcmp(functionName, "main") == 0) {
             mainFunctionEncountered = true;
-            result.streamLen += generateFunctionKeyInfoStream(
+            generateFunctionKeyInfoStream(
                 functionBody, functionKeyInfoStream, identifierHashList,
                 result.userFunctionList, true, userDefinedFunctionList);
             while (result.userFunctionList[result.userFunctionCount] != 0) {
                 result.userFunctionCount++;
             }
         } else {
-            result.streamLen += generateFunctionKeyInfoStream(
+            generateFunctionKeyInfoStream(
                 functionBody, functionKeyInfoStream, identifierHashList,
                 result.userFunctionList, false, userDefinedFunctionList);
         }
@@ -312,11 +311,22 @@ void destroyProgramKeyInfo(struct ProgramKeyInfo *target) {
     free(target->userFunctionList);
 }
 
-void generateProgramKeyInfoStreamStr(struct ProgramKeyInfo *programKeyInfo,
-                                     char *result) {
+size_t generateProgramKeyInfoStreamStr(struct ProgramKeyInfo *programKeyInfo,
+                                       char **ptrToResult) {
+    size_t outputLen = 0;
     // main
     char *mainInfoStream =
         HashTable_get(programKeyInfo->functionTable, (char *)"main");
+
+    outputLen += strlen(mainInfoStream);
+    for (size_t i = 0; i < programKeyInfo->userFunctionCount; i++) {
+        char *functionInfoStream = HashTable_get(
+            programKeyInfo->functionTable, programKeyInfo->userFunctionList[i]);
+        outputLen += strlen(functionInfoStream);
+    }
+
+    char *result = (char *)malloc((outputLen + 1) * sizeof(char));
+    *ptrToResult = result;
 
     strcpy(result, mainInfoStream);
     for (size_t i = 0; i < programKeyInfo->userFunctionCount; i++) {
@@ -324,6 +334,8 @@ void generateProgramKeyInfoStreamStr(struct ProgramKeyInfo *programKeyInfo,
             programKeyInfo->functionTable, programKeyInfo->userFunctionList[i]);
         strcat(result, functionInfoStream);
     }
+
+    return outputLen;
 }
 
 inline bool inIdentifierCharset(char c, bool begin) {

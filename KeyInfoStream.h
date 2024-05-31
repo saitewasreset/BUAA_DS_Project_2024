@@ -18,20 +18,19 @@ struct ProgramKeyInfo {
     char **userFunctionList;
     size_t userFunctionCount; // called in main, order by calling, functions in
                               // the list MAY NOT defined in the program
-    size_t streamLen;
 };
 
-size_t generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
-                                     uint64_t *identifierHashList,
-                                     char **userFunctionList,
-                                     bool saveUserFunction,
-                                     char **userDefinedFunctionList);
+void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
+                                   uint64_t *identifierHashList,
+                                   char **userFunctionList,
+                                   bool saveUserFunction,
+                                   char **userDefinedFunctionList);
 // source could end with '\f' or '\0'
 struct ProgramKeyInfo generateProgramKeyInfo(char *source,
                                              uint64_t *identifierHashList);
 
-void generateProgramKeyInfoStreamStr(struct ProgramKeyInfo *programKeyInfo,
-                                     char *result);
+size_t generateProgramKeyInfoStreamStr(struct ProgramKeyInfo *programKeyInfo,
+                                       char **ptrToResult);
 
 void destroyProgramKeyInfo(struct ProgramKeyInfo *target);
 
