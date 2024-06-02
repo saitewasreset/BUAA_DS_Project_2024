@@ -196,8 +196,7 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
             current++;
         } while (bracketCount != 0);
 
-        while (*current == '\n' || *current == '\r' || *current == '\t' ||
-               *current == ' ') {
+        while (isspace(*current)) {
             current++;
         }
 
@@ -212,8 +211,7 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
             current++;
         } while (bracketCount != 0);
 
-        while (*current == '\n' || *current == '\r' || *current == '\t' ||
-               *current == ' ') {
+        while (isspace(*current) && *current != '\f') {
             current++;
         }
     }

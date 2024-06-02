@@ -21,8 +21,7 @@ struct ProgramList generateProgramList(char *src,
 
     while (1) {
         // skip space
-        while (*src == ' ' || *src == '\n' || *src == '\r' || *src == '\t' ||
-               *src == '\r') {
+        while (isspace(*src)) {
             src++;
         }
         char *currentProgramSectionBegin = src;
@@ -39,8 +38,7 @@ struct ProgramList generateProgramList(char *src,
 
         // skip space
 
-        while (*src == ' ' || *src == '\n' || *src == '\r' || *src == '\t' ||
-               *src == '\r') {
+        while (isspace(*src)) {
             src++;
         }
 
