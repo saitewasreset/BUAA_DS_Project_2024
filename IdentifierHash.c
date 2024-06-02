@@ -1,4 +1,5 @@
 #include "IdentifierHash.h"
+#include "opt.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -27,17 +28,15 @@ uint64_t identifierHash(char *identifier) {
     return result;
 }
 
-uint64_t identifierSliceHash(char *str, size_t begin, size_t end) {
+uint64_t identifierSliceHash(char *begin, char *end) {
     uint64_t result = 0;
-    if (end - begin > 9) {
+    if ((end - begin) > 9) {
         return 0;
     }
 
-    str += begin;
-
-    for (size_t i = 0; i < (end - begin); i++) {
-        result = (result << 6) + identifierCharsetMap[(unsigned)*str];
-        str++;
+    while (begin != end) {
+        result = (result << 6) + identifierCharsetMap[(unsigned)*begin];
+        begin++;
     }
 
     return result;
@@ -69,9 +68,8 @@ bool isKeepwords(char *identifier, uint64_t *wordsList) {
     }
 }
 
-bool isKeepwordsSlice(char *str, size_t begin, size_t end,
-                      uint64_t *wordsList) {
-    uint64_t hash = identifierSliceHash(str, begin, end);
+bool isKeepwordsSlice(char *begin, char *end, uint64_t *wordsList) {
+    uint64_t hash = identifierSliceHash(begin, end);
     if (hash == 0) {
         return false;
     }

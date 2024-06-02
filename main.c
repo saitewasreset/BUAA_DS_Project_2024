@@ -1,14 +1,17 @@
 #include "CodeSimilarity.h"
 #include "HashTableFast.h"
 #include "IdentifierHash.h"
+#include "opt.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_CODES_LEN 1024 * 1024 * 64
 
 size_t max(size_t a, size_t b);
 void generateCharacterCount(char *str, unsigned int *target);
+void dumpInfo(struct ProgramList *result);
 
 char *buffer = NULL;
 
@@ -36,6 +39,7 @@ int main(void) {
     size_t skipByLen = 0;
     size_t skipBycD = 0;
     size_t skipByF = 0;
+    // dumpInfo(&result);
     for (size_t i = 0; i < result.programCount; i++) {
         bool alreadyChecked = alreadyCheckedList[i];
 
@@ -52,6 +56,8 @@ int main(void) {
                 size_t keyStreamBLen = result.programKeyStreamLen[j];
 
                 size_t maxStreamLen = max(keyStreamALen, keyStreamBLen);
+
+                size_t maxDist = maxStreamLen * (1 - SIMILARITY_THRESHOLD) + 1;
 
                 double most = 1;
                 if (keyStreamALen > keyStreamBLen) {
@@ -94,17 +100,17 @@ int main(void) {
                 int hDist = hammingDist(keyStreamA, keyStreamB,
                                         (int)keyStreamALen, (int)keyStreamBLen);
 
-                size_t maxDist = maxStreamLen * (1 - SIMILARITY_THRESHOLD) + 1;
-
                 if (hDist < (int)maxDist - 1) {
                     goto SIM;
                 }
 
-                double similarity =
-                    getSimilarity(keyStreamA, keyStreamB, keyStreamALen,
-                                  keyStreamBLen, maxDist);
+                double similarityThreshold =
+                    1.0 * maxStreamLen * (1 - SIMILARITY_THRESHOLD);
 
-                if (similarity > SIMILARITY_THRESHOLD) {
+                int ed = editdistDP(keyStreamA, keyStreamB, keyStreamALen,
+                                    keyStreamBLen, maxDist);
+
+                if (ed <= similarityThreshold) {
                 SIM:
                     if (!firstPrinted) {
                         if (!firstOutputCol) {
@@ -149,4 +155,30 @@ inline size_t max(size_t a, size_t b) {
     } else {
         return b;
     }
+}
+void dumpInfo(struct ProgramList *result) {
+    struct HashTable *table = result->processedProgramTable;
+    for (size_t i = 0; i < result->programCount; i++) {
+        char *currentProgramId = result->programList[i];
+        char *currentStream = HashTable_get(table, currentProgramId);
+
+        printf("%zu:%s: Len = %zu realLen = %zu\n%s\n\n", i, currentProgramId,
+               result->programKeyStreamLen[i], strlen(currentStream),
+               currentStream);
+    }
+    /*
+    puts("-------------------------------------------------------------");
+
+    for (size_t i = 0; i < result->programCount; i++) {
+        for (size_t j = i + 1; j < result->programCount; j++) {
+            char *streamA = HashTable_get(table, result->programList[i]);
+            char *streamB = HashTable_get(table, result->programList[j]);
+            int ed =
+                editdistDP(streamA, streamB, result->programKeyStreamLen[i],
+                           result->programKeyStreamLen[j], INT_MAX);
+
+            printf("(%zu:%zu):(%s:%s): ed = %d\n", i, j, result->programList[i],
+                   result->programList[j], ed);
+        }
+    }*/
 }

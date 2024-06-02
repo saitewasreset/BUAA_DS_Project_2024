@@ -1,5 +1,7 @@
+#include "opt.h"
 #include <limits.h>
 #include <stdlib.h>
+
 
 #define max2(a, b) ((a) > (b) ? (a) : (b))
 
@@ -8,7 +10,7 @@
 int (*Dp)[MaxDP];
 
 int editdistDP(char *str1, char *str2, int str1Len, int str2Len, int maxDist);
-int min3(int a, int b, int c);
+static int min3(int a, int b, int c);
 
 inline int min3(int a, int b, int c) {
     int min = a < b ? a : b;

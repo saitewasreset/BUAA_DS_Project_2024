@@ -1,6 +1,7 @@
 #include "KeyInfoStream.h"
 #include "HashTableFast.h"
 #include "IdentifierHash.h"
+#include "opt.h"
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,48 +14,45 @@ void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                                    bool saveUserFunction,
                                    char **userDefinedFunctionList) {
     size_t sourceLen = strlen(source);
-    char *_source = (char *)malloc((sourceLen + 1) * sizeof(char));
-    strcpy(_source, source);
+    // char *_source = (char *)malloc((sourceLen + 1) * sizeof(char));
+    // strcpy(_source, source);
 
     bool inIdentifier = false;
-    size_t currentIdentifierBegin = 0;
-    size_t currentIdentifierEnd = 0;
+    char *currentIdentifierBegin = source;
+    char *currentIdentifierEnd = source;
+    char *current = source;
 
     size_t userFunctionListLen = 0;
 
     // identifier: [begin, end)
     // 0x00 for to delete identifier; 0xFF for user function name
-    for (size_t i = 0; i < sourceLen; i++) {
-        if (inIdentifierCharset(_source[i], !inIdentifier)) {
+    while (*current != '\0') {
+        if (inIdentifierCharset(*current, !inIdentifier)) {
             if (!inIdentifier) {
                 inIdentifier = true;
-                currentIdentifierBegin = i;
+                currentIdentifierBegin = current;
             }
         } else {
             if (inIdentifier) {
                 inIdentifier = false;
-                currentIdentifierEnd = i;
+                currentIdentifierEnd = current;
 
-                if (!isKeepwordsSlice(_source, currentIdentifierBegin,
+                if (!isKeepwordsSlice(currentIdentifierBegin,
                                       currentIdentifierEnd,
                                       identifierHashList)) {
-                    // None-keep words identifier + ( -> function call ?
-                    if (_source[currentIdentifierEnd] != '(') {
-                        // delete
-                        memset(_source + currentIdentifierBegin, 0,
-                               (currentIdentifierEnd - currentIdentifierBegin) *
+                    if (*currentIdentifierEnd != '(') {
+                        memset(currentIdentifierBegin, 0xFE,
+                               (size_t)(currentIdentifierEnd -
+                                        currentIdentifierBegin) *
                                    sizeof(char));
                     } else {
-                        // neither keep words nor user defined function ->
-                        // delete?
-
-                        char *userFunctionName =
-                            (char *)malloc((currentIdentifierEnd -
-                                            currentIdentifierBegin + 1) *
-                                           sizeof(char));
-                        memcpy(userFunctionName,
-                               _source + currentIdentifierBegin,
-                               (currentIdentifierEnd - currentIdentifierBegin) *
+                        char *userFunctionName = (char *)malloc(
+                            (size_t)(currentIdentifierEnd -
+                                     currentIdentifierBegin + 1) *
+                            sizeof(char));
+                        memcpy(userFunctionName, currentIdentifierBegin,
+                               (size_t)(currentIdentifierEnd -
+                                        currentIdentifierBegin) *
                                    sizeof(char));
                         userFunctionName[currentIdentifierEnd -
                                          currentIdentifierBegin] = '\0';
@@ -98,14 +96,14 @@ void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                             } else {
                                 free(userFunctionName);
                             }
-                            memset(_source + currentIdentifierBegin, 0xFF,
-                                   (currentIdentifierEnd -
-                                    currentIdentifierBegin) *
+                            memset(currentIdentifierBegin, 0xFF,
+                                   (size_t)(currentIdentifierEnd -
+                                            currentIdentifierBegin) *
                                        sizeof(char));
                         } else {
-                            memset(_source + currentIdentifierBegin, 0,
-                                   (currentIdentifierEnd -
-                                    currentIdentifierBegin) *
+                            memset(currentIdentifierBegin, 0xFE,
+                                   (size_t)(currentIdentifierEnd -
+                                            currentIdentifierBegin) *
                                        sizeof(char));
                             free(userFunctionName);
                         }
@@ -113,21 +111,22 @@ void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                 }
             }
         }
+        current++;
     }
 
     size_t keyInfoStreamIndex = 0;
     bool userFunctionIdentifierInserted = false;
-    for (size_t i = 0; i < sourceLen; i++) {
-
-        if (((uint8_t)_source[i]) != 0 && ((uint8_t)_source[i]) != 0xFF) {
+    current = source;
+    while (*current != '\0') {
+        while (isspace(*current)) {
+            current++;
+        }
+        if ((uint8_t)*current < 0xFE) {
             userFunctionIdentifierInserted = false;
-            if (_source[i] == ' ' || _source[i] == '\n' || _source[i] == '\r' ||
-                _source[i] == '\t') {
-                continue;
-            }
-            keyInfoStream[keyInfoStreamIndex] = _source[i];
+
+            keyInfoStream[keyInfoStreamIndex] = *current;
             keyInfoStreamIndex++;
-        } else if (((uint8_t)_source[i]) == 0) {
+        } else if ((uint8_t)*current == 0xFE) {
             userFunctionIdentifierInserted = false;
         } else {
             if (!userFunctionIdentifierInserted) {
@@ -138,10 +137,10 @@ void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                 userFunctionIdentifierInserted = true;
             }
         }
+        current++;
     }
 
     keyInfoStream[keyInfoStreamIndex] = '\0';
-    free(_source);
 }
 
 struct ProgramKeyInfo generateProgramKeyInfo(char *source,

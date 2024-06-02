@@ -1,6 +1,7 @@
 #include "CodeSimilarity.h"
 #include "HashTableFast.h"
 #include "KeyInfoStream.h"
+#include "opt.h"
 #include <ctype.h>
 #include <stdint.h>
 #include <stdlib.h>
