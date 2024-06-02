@@ -22,5 +22,5 @@ double getSimilarity(char *keyStreamA, char *keyStreamB, size_t keyStreamALen,
 void destroyProgramList(struct ProgramList *target);
 int editdistDP(char *str1, char *str2, int str1Len, int str2Len, int maxDist);
 int hammingDist(char *str1, char *str2, int str1Len, int str2Len);
-
+int wagner_fischer_O2(char *s1, char *s2, int maxDist);
 #endif

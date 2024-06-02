@@ -59,6 +59,9 @@ int main(void) {
 
                 size_t maxDist = maxStreamLen * (1 - SIMILARITY_THRESHOLD) + 1;
 
+                double similarityThreshold =
+                    1.0 * maxStreamLen * (1 - SIMILARITY_THRESHOLD);
+
                 double most = 1;
                 if (keyStreamALen > keyStreamBLen) {
                     most = (double)(keyStreamBLen) / (double)keyStreamALen;
@@ -104,12 +107,7 @@ int main(void) {
                     goto SIM;
                 }
 
-                double similarityThreshold =
-                    1.0 * maxStreamLen * (1 - SIMILARITY_THRESHOLD);
-
-                int ed = editdistDP(keyStreamA, keyStreamB, keyStreamALen,
-                                    keyStreamBLen, maxDist);
-
+                int ed = wagner_fischer_O2(keyStreamA, keyStreamB, maxDist);
                 if (ed <= similarityThreshold) {
                 SIM:
                     if (!firstPrinted) {
