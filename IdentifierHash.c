@@ -2,6 +2,7 @@
 #include "opt.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 const uint64_t identifierCharsetMap[128] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -30,9 +31,6 @@ uint64_t identifierHash(char *identifier) {
 
 uint64_t identifierSliceHash(char *begin, char *end) {
     uint64_t result = 0;
-    if ((end - begin) > 9) {
-        return 0;
-    }
 
     while (begin != end) {
         result = (result << 6) + identifierCharsetMap[(unsigned)*begin];
@@ -43,15 +41,26 @@ uint64_t identifierSliceHash(char *begin, char *end) {
 }
 
 void generateKeepwordsList(FILE *src, uint64_t *wordsList) {
+
+    beginMap = calloc(128, sizeof(uint8_t[128][MAX_KEEP_WORDS_LEN]));
+
     char keepwordsBuffer[MAX_KEEP_WORDS_LEN + 1] = {0};
     uint_fast8_t i = 0;
     while (fscanf(src, "%s", keepwordsBuffer) > 0) {
         wordsList[i] = identifierHash(keepwordsBuffer);
+
+        uint8_t wordLen = (uint8_t)strlen(keepwordsBuffer);
+        if (wordLen >= 2) {
+            beginMap[keepwordsBuffer[0]][keepwordsBuffer[1]][wordLen] = 1;
+        }
+
         i++;
     }
 
     qsort(wordsList, KEEP_WORDS_LIST_LEN, sizeof(uint64_t), hashCmp);
 }
+
+void destroyBeginMap(void) { free(beginMap); }
 
 bool isKeepwords(char *identifier, uint64_t *wordsList) {
     uint64_t hash = identifierHash(identifier);
@@ -69,10 +78,15 @@ bool isKeepwords(char *identifier, uint64_t *wordsList) {
 }
 
 bool isKeepwordsSlice(char *begin, char *end, uint64_t *wordsList) {
-    uint64_t hash = identifierSliceHash(begin, end);
-    if (hash == 0) {
+    if (((end - begin) > 9) || ((end - begin) <= 1)) {
         return false;
     }
+
+    if (beginMap[*begin][*(begin + 1)][end - begin] == 0) {
+        return false;
+    }
+
+    uint64_t hash = identifierSliceHash(begin, end);
 
     uint64_t *result = bsearch(&hash, wordsList, KEEP_WORDS_LIST_LEN,
                                sizeof(uint64_t), hashCmp);

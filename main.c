@@ -129,6 +129,7 @@ int main(void) {
         }
     }
     // printf("\n%zu %zu %zu %zu\n", totalCmp, skipByLen, skipBycD, skipByF);
+    destroyBeginMap();
     free(characterCountList);
     free(characterCountGenerated);
     free(alreadyCheckedList);
