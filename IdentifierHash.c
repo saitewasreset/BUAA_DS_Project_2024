@@ -42,7 +42,7 @@ uint64_t identifierSliceHash(char *begin, char *end) {
 
 void generateKeepwordsList(FILE *src, uint64_t *wordsList) {
 
-    beginMap = calloc(128, sizeof(uint8_t[128][MAX_KEEP_WORDS_LEN]));
+    beginMap = calloc(128, sizeof(uint8_t[128][MAX_KEEP_WORDS_LEN + 1]));
 
     char keepwordsBuffer[MAX_KEEP_WORDS_LEN + 1] = {0};
     uint_fast8_t i = 0;

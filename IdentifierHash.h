@@ -11,7 +11,7 @@
 
 // a * 64 == a << 6
 
-static uint8_t (*beginMap)[128][MAX_KEEP_WORDS_LEN] = NULL;
+static uint8_t (*beginMap)[128][MAX_KEEP_WORDS_LEN + 1] = NULL;
 
 uint64_t identifierHash(char *identifier);
 // [begin, end)

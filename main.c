@@ -106,8 +106,25 @@ int main(void) {
                 if (hDist < (int)maxDist - 1) {
                     goto SIM;
                 }
+                /*
+                int ed = rockEditDistance(keyStreamA, keyStreamB, 600);
+                int edStd = editdistDP(keyStreamA, keyStreamB);
 
-                int ed = wagner_fischer_O2(keyStreamA, keyStreamB, maxDist);
+                if (edStd < 600) {
+                    if (edStd == ed) {
+                        printf("!%zu:%zu: %d\n", i, j, edStd);
+                    } else {
+                        printf("Failed!\n");
+                        return 0;
+                    }
+                } else {
+                    printf(".%zu:%zu: %d\n", i, j, edStd);
+                }
+                */
+                int ed = rockEditDistance(
+                    keyStreamA, keyStreamB, result.programKeyStreamLen[i],
+                    result.programKeyStreamLen[j], maxDist);
+
                 if (ed <= similarityThreshold) {
                 SIM:
                     if (!firstPrinted) {
@@ -161,23 +178,20 @@ void dumpInfo(struct ProgramList *result) {
         char *currentProgramId = result->programList[i];
         char *currentStream = HashTable_get(table, currentProgramId);
 
-        printf("%zu:%s: Len = %zu realLen = %zu\n%s\n\n", i, currentProgramId,
-               result->programKeyStreamLen[i], strlen(currentStream),
-               currentStream);
+        printf("%zu:%s: Len = %zu\n%s\n\n", i, currentProgramId,
+               strlen(currentStream), currentStream);
     }
-    /*
+
     puts("-------------------------------------------------------------");
 
     for (size_t i = 0; i < result->programCount; i++) {
         for (size_t j = i + 1; j < result->programCount; j++) {
             char *streamA = HashTable_get(table, result->programList[i]);
             char *streamB = HashTable_get(table, result->programList[j]);
-            int ed =
-                editdistDP(streamA, streamB, result->programKeyStreamLen[i],
-                           result->programKeyStreamLen[j], INT_MAX);
+            int ed = editdistDP(streamA, streamB);
 
             printf("(%zu:%zu):(%s:%s): ed = %d\n", i, j, result->programList[i],
                    result->programList[j], ed);
         }
-    }*/
+    }
 }
