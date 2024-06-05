@@ -13,9 +13,6 @@ void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
                                    char **userFunctionList,
                                    bool saveUserFunction,
                                    char **userDefinedFunctionList) {
-    size_t sourceLen = strlen(source);
-    // char *_source = (char *)malloc((sourceLen + 1) * sizeof(char));
-    // strcpy(_source, source);
 
     bool inIdentifier = false;
     char *currentIdentifierBegin = source;
@@ -25,7 +22,7 @@ void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
     size_t userFunctionListLen = 0;
 
     // identifier: [begin, end)
-    // 0x00 for to delete identifier; 0xFF for user function name
+    // 0xFE for to delete identifier; 0xFF for user function name
     while (*current != '\0') {
         if (inIdentifierCharset(*current, !inIdentifier)) {
             if (!inIdentifier) {
@@ -118,7 +115,8 @@ void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
     bool userFunctionIdentifierInserted = false;
     current = source;
     while (*current != '\0') {
-        while (isspace(*current)) {
+        while ((*current == ' ') || (*current == '\n') || (*current == '\r') ||
+               (*current == '\t')) {
             current++;
         }
         if ((uint8_t)*current < 0xFE) {
@@ -188,12 +186,24 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
         // paramList
         size_t bracketCount = 0;
         do {
-            if (*current == '(') {
-                bracketCount++;
-            } else if (*current == ')') {
+            char *nextOpen = strchr(current, '(');
+            char *nextClose = strchr(current, ')');
+            if (nextOpen == NULL) {
                 bracketCount--;
+                current = nextClose + 1;
+            } else if (nextClose == NULL) {
+                bracketCount++;
+                current = nextOpen + 1;
+            } else {
+                if (nextOpen < nextClose) {
+                    bracketCount++;
+                    current = nextOpen + 1;
+                } else {
+                    bracketCount--;
+                    current = nextClose + 1;
+                }
             }
-            current++;
+
         } while (bracketCount != 0);
 
         while (isspace(*current)) {
@@ -203,12 +213,25 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
         // body
         bracketCount = 0;
         do {
-            if (*current == '{') {
-                bracketCount++;
-            } else if (*current == '}') {
+            char *nextOpen = strchr(current, '{');
+            char *nextClose = strchr(current, '}');
+
+            if (nextOpen == NULL) {
                 bracketCount--;
+                current = nextClose + 1;
+            } else if (nextClose == NULL) {
+                bracketCount++;
+                current = nextOpen + 1;
+            } else {
+                if (nextOpen < nextClose) {
+                    bracketCount++;
+                    current = nextOpen + 1;
+                } else {
+                    bracketCount--;
+                    current = nextClose + 1;
+                }
             }
-            current++;
+
         } while (bracketCount != 0);
 
         while (isspace(*current) && *current != '\f') {
@@ -233,30 +256,53 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
         // paramList
         size_t bracketCount = 0;
         do {
-            if (*current == '(') {
-                bracketCount++;
-            } else if (*current == ')') {
+            char *nextOpen = strchr(current, '(');
+            char *nextClose = strchr(current, ')');
+            if (nextOpen == NULL) {
                 bracketCount--;
+                current = nextClose + 1;
+            } else if (nextClose == NULL) {
+                bracketCount++;
+                current = nextOpen + 1;
+            } else {
+                if (nextOpen < nextClose) {
+                    bracketCount++;
+                    current = nextOpen + 1;
+                } else {
+                    bracketCount--;
+                    current = nextClose + 1;
+                }
             }
-            current++;
         } while (bracketCount != 0);
 
         // body
 
-        while (*current == '\n' || *current == '\r' || *current == '\t' ||
-               *current == ' ') {
+        while (*current == ' ' || *current == '\n' || *current == '\r' ||
+               *current == '\t') {
             current++;
         }
 
         char *bodyBegin = current;
         bracketCount = 0;
         do {
-            if (*current == '{') {
-                bracketCount++;
-            } else if (*current == '}') {
+            char *nextOpen = strchr(current, '{');
+            char *nextClose = strchr(current, '}');
+
+            if (nextOpen == NULL) {
                 bracketCount--;
+                current = nextClose + 1;
+            } else if (nextClose == NULL) {
+                bracketCount++;
+                current = nextOpen + 1;
+            } else {
+                if (nextOpen < nextClose) {
+                    bracketCount++;
+                    current = nextOpen + 1;
+                } else {
+                    bracketCount--;
+                    current = nextClose + 1;
+                }
             }
-            current++;
         } while (bracketCount != 0);
 
         size_t bodyLen = (size_t)(current - bodyBegin);
