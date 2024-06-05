@@ -83,9 +83,8 @@ inline double getSimilarity(char *keyStreamA, char *keyStreamB,
                             size_t maxDist) {
     size_t maxStreamLen =
         keyStreamALen > keyStreamBLen ? keyStreamALen : keyStreamBLen;
-    return 1 - (double)(editdistDP(keyStreamA, keyStreamB, (int)keyStreamALen,
-                                   (int)keyStreamBLen, (int)maxDist)) /
-                   (double)maxStreamLen;
+    return 1 -
+           (double)(editdistDP(keyStreamA, keyStreamB)) / (double)maxStreamLen;
 }
 
 int hammingDist(char *str1, char *str2, int str1Len, int str2Len) {

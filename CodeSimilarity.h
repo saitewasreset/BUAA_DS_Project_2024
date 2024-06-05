@@ -20,7 +20,8 @@ struct ProgramList generateProgramList(char *src, uint64_t *identifierHashList);
 double getSimilarity(char *keyStreamA, char *keyStreamB, size_t keyStreamALen,
                      size_t keyStreamBLen, size_t maxDist);
 void destroyProgramList(struct ProgramList *target);
-int editdistDP(char *str1, char *str2, int str1Len, int str2Len, int maxDist);
 int hammingDist(char *str1, char *str2, int str1Len, int str2Len);
-int wagner_fischer_O2(char *s1, char *s2, int maxDist);
+
+int editdistDP(char *str1, char *str2);
+int rockEditDistance(char *s1, char *s2, int strLen1, int strLen2, int maxDist);
 #endif
