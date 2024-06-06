@@ -8,137 +8,198 @@
 
 bool inIdentifierCharset(char c, bool begin);
 
-void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
-                                   uint64_t *identifierHashList,
-                                   char **userFunctionList,
-                                   bool saveUserFunction,
-                                   char **userDefinedFunctionList) {
+void generateFunctionKeyInfoStreamFastMain(char *source,
+                                           char *outputKeyInfoStream,
+                                           uint64_t *identifierHashList,
+                                           char **userFunctionList,
+                                           char **userDefinedFunctionList) {
+    char *currentSource = source;
 
     bool inIdentifier = false;
-    char *currentIdentifierBegin = source;
-    char *currentIdentifierEnd = source;
-    char *current = source;
+    char *currentIdentifierBegin = currentSource;
+    char *currentIdentifierEnd = currentSource;
+    size_t userFunctionLen = 0;
+    /*
+{
+    int i, j, v1, v2, t;
+    FILE *fp = fopen("", "");
+    */
 
-    size_t userFunctionListLen = 0;
-
-    // identifier: [begin, end)
-    // 0xFE for to delete identifier; 0xFF for user function name
-    while (*current != '\0') {
-        if (inIdentifierCharset(*current, !inIdentifier)) {
+    while (*currentSource != '\0') {
+        if (inIdentifierCharset(*currentSource, !inIdentifier)) {
             if (!inIdentifier) {
                 inIdentifier = true;
-                currentIdentifierBegin = current;
+                currentIdentifierBegin = currentSource;
             }
         } else {
             if (inIdentifier) {
                 inIdentifier = false;
-                currentIdentifierEnd = current;
+                currentIdentifierEnd = currentSource;
 
                 if (!isKeepwordsSlice(currentIdentifierBegin,
                                       currentIdentifierEnd,
                                       identifierHashList)) {
-                    if (*currentIdentifierEnd != '(') {
-                        memset(currentIdentifierBegin, 0xFE,
-                               (size_t)(currentIdentifierEnd -
-                                        currentIdentifierBegin) *
-                                   sizeof(char));
-                    } else {
-                        char *userFunctionName = (char *)malloc(
-                            (size_t)(currentIdentifierEnd -
-                                     currentIdentifierBegin + 1) *
-                            sizeof(char));
-                        memcpy(userFunctionName, currentIdentifierBegin,
-                               (size_t)(currentIdentifierEnd -
-                                        currentIdentifierBegin) *
-                                   sizeof(char));
-                        userFunctionName[currentIdentifierEnd -
-                                         currentIdentifierBegin] = '\0';
-
+                    if (*currentIdentifierEnd == '(') {
                         bool isUserDefinedFunction = false;
-                        size_t userDefinedFunctionIdx = 0;
-                        while (
-                            userDefinedFunctionList[userDefinedFunctionIdx] !=
-                            0) {
-                            if (strcmp(userFunctionName,
-                                       userDefinedFunctionList
-                                           [userDefinedFunctionIdx]) == 0) {
-                                isUserDefinedFunction = true;
-                                break;
+
+                        char **currentUserDefinedFunction =
+                            userDefinedFunctionList;
+
+                        size_t currentIdentifierLen =
+                            currentIdentifierEnd - currentIdentifierBegin;
+                        while (*currentUserDefinedFunction != NULL) {
+                            if (memcmp(currentIdentifierBegin,
+                                       *currentUserDefinedFunction,
+                                       currentIdentifierLen) == 0) {
+                                if ((*currentUserDefinedFunction)
+                                        [currentIdentifierLen] == '\0') {
+                                    isUserDefinedFunction = true;
+                                    break;
+                                }
                             }
-                            userDefinedFunctionIdx++;
+                            currentUserDefinedFunction++;
                         }
+
                         if (isUserDefinedFunction) {
-                            // replace with "FUNC"
-                            if (saveUserFunction) {
-                                // check exists (slow ?)
-                                bool userFunctionFound = false;
+                            char *functionName = (char *)malloc(
+                                (currentIdentifierLen + 1) * sizeof(char));
+                            memcpy(functionName, currentIdentifierBegin,
+                                   currentIdentifierLen);
 
-                                for (size_t j = 0; j < userFunctionListLen;
-                                     j++) {
-                                    if (strcmp(userFunctionName,
-                                               userFunctionList[j]) == 0) {
-                                        userFunctionFound = true;
+                            functionName[currentIdentifierLen] = '\0';
 
-                                        break;
-                                    }
+                            bool userFunctionInserted = false;
+
+                            for (size_t i = 0; i < userFunctionLen; i++) {
+                                if (strcmp(userFunctionList[i], functionName) ==
+                                    0) {
+                                    userFunctionInserted = true;
+                                    break;
                                 }
-
-                                if (!userFunctionFound) {
-                                    userFunctionList[userFunctionListLen] =
-                                        userFunctionName;
-                                    userFunctionListLen++;
-                                } else {
-                                    free(userFunctionName);
-                                }
-                            } else {
-                                free(userFunctionName);
                             }
-                            memset(currentIdentifierBegin, 0xFF,
-                                   (size_t)(currentIdentifierEnd -
-                                            currentIdentifierBegin) *
-                                       sizeof(char));
-                        } else {
-                            memset(currentIdentifierBegin, 0xFE,
-                                   (size_t)(currentIdentifierEnd -
-                                            currentIdentifierBegin) *
-                                       sizeof(char));
-                            free(userFunctionName);
+
+                            if (!userFunctionInserted) {
+                                userFunctionList[userFunctionLen] =
+                                    functionName;
+                                userFunctionLen++;
+                            }
+
+                            memcpy(outputKeyInfoStream,
+                                   (const void *)USER_FUNCTION_IDENTIFIER,
+                                   sizeof(USER_FUNCTION_IDENTIFIER) - 1);
+
+                            outputKeyInfoStream +=
+                                sizeof(USER_FUNCTION_IDENTIFIER) - 1;
                         }
                     }
+
+                } else {
+                    memcpy(outputKeyInfoStream, currentIdentifierBegin,
+                           currentIdentifierEnd - currentIdentifierBegin);
+                    outputKeyInfoStream +=
+                        currentIdentifierEnd - currentIdentifierBegin;
+                }
+                // keep currentIdentifierEnd
+                currentSource--;
+            } else {
+                if ((*currentSource != ' ') && (*currentSource != '\n') &&
+                    (*currentSource != '\r') && (*currentSource != '\t')) {
+                    *outputKeyInfoStream = *currentSource;
+                    outputKeyInfoStream++;
                 }
             }
         }
-        current++;
+        currentSource++;
     }
+    *outputKeyInfoStream = '\0';
+}
 
-    size_t keyInfoStreamIndex = 0;
-    bool userFunctionIdentifierInserted = false;
-    current = source;
-    while (*current != '\0') {
-        while ((*current == ' ') || (*current == '\n') || (*current == '\r') ||
-               (*current == '\t')) {
-            current++;
-        }
-        if ((uint8_t)*current < 0xFE) {
-            userFunctionIdentifierInserted = false;
+void generateFunctionKeyInfoStreamFast(char *source, char *outputKeyInfoStream,
+                                       uint64_t *identifierHashList,
+                                       char **userDefinedFunctionList) {
+    char *currentSource = source;
 
-            keyInfoStream[keyInfoStreamIndex] = *current;
-            keyInfoStreamIndex++;
-        } else if ((uint8_t)*current == 0xFE) {
-            userFunctionIdentifierInserted = false;
+    bool inIdentifier = false;
+    char *currentIdentifierBegin = currentSource;
+    char *currentIdentifierEnd = currentSource;
+
+    /*
+{
+    int i, j, v1, v2, t;
+    FILE *fp = fopen("", "");
+    */
+
+    while (*currentSource != '\0') {
+        if (inIdentifierCharset(*currentSource, !inIdentifier)) {
+            if (!inIdentifier) {
+                inIdentifier = true;
+                currentIdentifierBegin = currentSource;
+            }
         } else {
-            if (!userFunctionIdentifierInserted) {
-                memcpy(keyInfoStream + keyInfoStreamIndex,
-                       USER_FUNCTION_IDENTIFIER,
-                       sizeof(USER_FUNCTION_IDENTIFIER) - 1);
-                keyInfoStreamIndex += sizeof(USER_FUNCTION_IDENTIFIER) - 1;
-                userFunctionIdentifierInserted = true;
+            if (inIdentifier) {
+                inIdentifier = false;
+                currentIdentifierEnd = currentSource;
+
+                if (!isKeepwordsSlice(currentIdentifierBegin,
+                                      currentIdentifierEnd,
+                                      identifierHashList)) {
+                    if (*currentIdentifierEnd == '(') {
+                        bool isUserDefinedFunction = false;
+
+                        char **currentUserDefinedFunction =
+                            userDefinedFunctionList;
+
+                        size_t currentIdentifierLen =
+                            currentIdentifierEnd - currentIdentifierBegin;
+                        while (*currentUserDefinedFunction != NULL) {
+                            if (memcmp(currentIdentifierBegin,
+                                       *currentUserDefinedFunction,
+                                       currentIdentifierLen) == 0) {
+                                if ((*currentUserDefinedFunction)
+                                        [currentIdentifierLen] == '\0') {
+                                    isUserDefinedFunction = true;
+                                    break;
+                                }
+                            }
+                            currentUserDefinedFunction++;
+                        }
+
+                        if (isUserDefinedFunction) {
+                            char *functionName = (char *)malloc(
+                                (currentIdentifierLen + 1) * sizeof(char));
+                            memcpy(functionName, currentIdentifierBegin,
+                                   currentIdentifierLen);
+
+                            functionName[currentIdentifierLen] = '\0';
+
+                            memcpy(outputKeyInfoStream,
+                                   (const void *)USER_FUNCTION_IDENTIFIER,
+                                   sizeof(USER_FUNCTION_IDENTIFIER) - 1);
+
+                            outputKeyInfoStream +=
+                                sizeof(USER_FUNCTION_IDENTIFIER) - 1;
+                        }
+                    }
+
+                } else {
+                    memcpy(outputKeyInfoStream, currentIdentifierBegin,
+                           currentIdentifierEnd - currentIdentifierBegin);
+                    outputKeyInfoStream +=
+                        currentIdentifierEnd - currentIdentifierBegin;
+                }
+                // keep currentIdentifierEnd
+                currentSource--;
+            } else {
+                if ((*currentSource != ' ') && (*currentSource != '\n') &&
+                    (*currentSource != '\r') && (*currentSource != '\t')) {
+                    *outputKeyInfoStream = *currentSource;
+                    outputKeyInfoStream++;
+                }
             }
         }
-        current++;
+        currentSource++;
     }
-
-    keyInfoStream[keyInfoStreamIndex] = '\0';
+    *outputKeyInfoStream = '\0';
 }
 
 struct ProgramKeyInfo generateProgramKeyInfo(char *source,
@@ -316,23 +377,24 @@ struct ProgramKeyInfo generateProgramKeyInfo(char *source,
             (char *)malloc((bodyLen + 1) * sizeof(char));
         if (!mainFunctionEncountered && strcmp(functionName, "main") == 0) {
             mainFunctionEncountered = true;
-            generateFunctionKeyInfoStream(
+
+            generateFunctionKeyInfoStreamFastMain(
                 functionBody, functionKeyInfoStream, identifierHashList,
-                result.userFunctionList, true, userDefinedFunctionList);
+                result.userFunctionList, userDefinedFunctionList);
+
             while (result.userFunctionList[result.userFunctionCount] != 0) {
                 result.userFunctionCount++;
             }
         } else {
-            generateFunctionKeyInfoStream(
+            generateFunctionKeyInfoStreamFast(
                 functionBody, functionKeyInfoStream, identifierHashList,
-                result.userFunctionList, false, userDefinedFunctionList);
+                userDefinedFunctionList);
         }
         free(functionBody);
         while (*current == '\n' || *current == '\r' || *current == '\t' ||
                *current == ' ') {
             current++;
         }
-
         HashTable_insert(table, functionName, functionKeyInfoStream);
     }
 

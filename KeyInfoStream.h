@@ -21,11 +21,14 @@ struct ProgramKeyInfo {
     char *programKeyInfoStream;
 };
 
-void generateFunctionKeyInfoStream(char *source, char *keyInfoStream,
-                                   uint64_t *identifierHashList,
-                                   char **userFunctionList,
-                                   bool saveUserFunction,
-                                   char **userDefinedFunctionList);
+void generateFunctionKeyInfoStreamFastMain(char *source,
+                                           char *outputKeyInfoStream,
+                                           uint64_t *identifierHashList,
+                                           char **userFunctionList,
+                                           char **userDefinedFunctionList);
+void generateFunctionKeyInfoStreamFast(char *source, char *outputKeyInfoStream,
+                                       uint64_t *identifierHashList,
+                                       char **userDefinedFunctionList);
 // source could end with '\f' or '\0'
 struct ProgramKeyInfo generateProgramKeyInfo(char *source,
                                              uint64_t *identifierHashList);
