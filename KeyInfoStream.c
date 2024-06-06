@@ -6,6 +6,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+bool isIdentifierCharacterNoBegin[129] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0};
+
+bool isIdentifierCharacterBegin[129] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0};
 bool inIdentifierCharset(char c, bool begin);
 
 void generateFunctionKeyInfoStreamFastMain(char *source,
@@ -443,23 +458,11 @@ size_t generateProgramKeyInfoStreamStr(struct ProgramKeyInfo *programKeyInfo,
 }
 
 inline bool inIdentifierCharset(char c, bool begin) {
-    if (isalpha(c)) {
-        return true;
+    if (begin) {
+        return isIdentifierCharacterBegin[(unsigned)c];
+    } else {
+        return isIdentifierCharacterNoBegin[(unsigned)c];
     }
-
-    if (isalnum(c)) {
-        if (begin) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    if (c == '_') {
-        return true;
-    }
-
-    return false;
 }
 
 unsigned long long HashTable_hash(char *data) {
